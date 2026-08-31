@@ -6,41 +6,99 @@ import { differenceInDays, isSameDay } from "date-fns";
 import { epoch, generateAnswerObjs, incrementDups } from "./utils";
 import { Answer } from "./models/answer";
 
-export const useMainStore = defineStore({
-  id: "main",
+interface LocaleAnswerData {
+  [locale: string]: Answer[];
+}
+
+interface LocaleAnswers {
+  [locale: string]: string[];
+}
+
+interface LocaleLetters {
+  [locale: string]: string;
+}
+
+interface LocaleMiddleLetters {
+  [locale: string]: string;
+}
+
+interface LocaleCorrectGuesses {
+  [locale: string]: Set<string>;
+}
+
+interface LocaleYesterdayAnswerObj {
+  [locale: string]: Answer;
+}
+
+const correctGuesses = ['en', 'cs'].reduce((acc, curr) => {
+  acc[curr] = new Set([]);
+  return acc;
+}, {} as LocaleCorrectGuesses);
+
+export const useMainStore = defineStore("main", {
   state: () => ({
-    // todays puzzle
-    // correctGuesses as array caused infinite update issue when game was open in multiple tabs. see #6
-    correctGuesses: useStorage("correctGuesses", new Set([]) as Set<string>),
-    answers: useStorage("answers", [] as Array<string>),
-    availableLetters: useStorage("availableLetters", "" as string),
-    middleLetter: useStorage("middleLetter", "" as string),
+    correctGuesses: useStorage(
+      "localeCorrectGuesses",
+      correctGuesses as LocaleCorrectGuesses,
+      undefined,
+      {
+        serializer: {
+          read: (v: string): LocaleCorrectGuesses =>
+            Object.fromEntries(
+              Object.entries(JSON.parse(v)).map(([locale, arr]) => [
+                locale,
+                new Set(arr as string[]),
+              ])
+            ),
+          write: (v: LocaleCorrectGuesses): string =>
+            JSON.stringify(
+              Object.fromEntries(
+                Object.entries(v).map(([locale, set]) => [
+                  locale,
+                  Array.from(set),
+                ])
+              )
+            ),
+        },
+      }
+    ),
+    answers: useStorage("localeAnswers", {} as LocaleAnswers),
+    availableLetters: useStorage("localeLetters", {} as LocaleLetters),
+    middleLetter: useStorage("localeMiddleLetters", {} as LocaleMiddleLetters),
     gameDate: useStorage("gameDate", epoch as Date),
     lastGameDate: useStorage("lastGameDate", new Date() as Date),
-    // yesterdays puzzle
-    yesterdaysAnswers: useStorage("yesterdaysAnswers", [] as Array<string>),
-    yesterdaysAvailableLetters: useStorage(
-      "yesterdaysAvailableLetters",
-      "" as string
+    yesterdaysAnswers: useStorage(
+      "localeYesterdaysAnswers",
+      {} as LocaleAnswers
     ),
-    yesterdaysMiddleLetter: useStorage("yesterdaysMiddleLetter", "" as string),
+    yesterdaysAvailableLetters: useStorage(
+      "localeYesterdaysLetters",
+      {} as LocaleLetters
+    ),
+    yesterdaysMiddleLetter: useStorage(
+      "localeYesterdaysMiddleLetters",
+      {} as LocaleMiddleLetters
+    ),
     theme: useStorage("theme", "light" as string),
-    // don't need to be in local storage because they doesn't change
+    language: useStorage("language", "en" as string),
     pointsMessages: {
-      1: "good",
-      5: "nice",
-      6: "great",
-      7: "excellent",
-      8: "amazing",
+        1: "good",
+        5: "nice",
+        6: "great",
+        7: "excellent",
+        8: "amazing",
     } as { [key: number]: string },
   }),
   getters: {
     // TODO: move getMaxScore, getScoreLevels to state? compute once at startGame
     getMaxScore(): number {
-      return this.answers.reduce((acc: number, word: string): number => {
-        // @ts-ignore issue with this ref? says .calculatePoints is undefined here but not outside arrow funcs
-        return acc + this.calculatePoints({ word });
-      }, 0);
+      return this.answers[this.language]?.reduce(
+        (acc: number, word: string): number => {
+          // @ts-ignore issue with this ref? says .calculatePoints is undefined here but not outside arrow funcs
+          return acc + this.calculatePoints({ word });
+        },
+        0
+      );
     },
     getMinScore(): number {
       // 19 4-letter words @ 1 point each, 1 pangram @ min 14 points.
@@ -70,7 +128,7 @@ export const useMainStore = defineStore({
     },
     // as getter so result can be cached
     getCorrectGuesses(): Array<string> {
-      return Array.from(this.correctGuesses);
+      return Array.from(this.correctGuesses[this.language]);
     },
     getProgressIndex(): number {
       return (
@@ -95,12 +153,14 @@ export const useMainStore = defineStore({
     },
     getGameDate(): Date {
       // handle case where gameDate may still be string in localStorage from previous code
-      return typeof this.gameDate === "string"
-        ? new Date(this.gameDate)
-        : this.gameDate;
+      return this.gameDate;
     },
     getGameDateString(): string {
-      return this.getGameDate.toISOString().split("T")[0];
+      const locales: Record<string, string> = {
+        en: "en-gb",
+        cs: "cs-cz",
+      };
+      return this.getGameDate.toLocaleDateString(locales[this.language]);
     },
   },
   actions: {
@@ -121,23 +181,23 @@ export const useMainStore = defineStore({
           message: $t("too short"),
         });
       }
-      if (!guess.split("").includes(this.middleLetter)) {
+      if (!guess.split("").includes(this.middleLetter[this.language])) {
         return this.showMessage({
           message: $t("missing middle letter"),
         });
       }
-      if (!this.answers.includes(guess)) {
+      if (!this.answers[this.language].includes(guess)) {
         return this.showMessage({
           message: $t("not in word list"),
         });
       }
-      if (this.correctGuesses.has(guess)) {
+      if (this.correctGuesses[this.language].has(guess)) {
         return this.showMessage({
           message: $t("already found"),
         });
       }
 
-      this.correctGuesses.add(guess);
+      this.correctGuesses[this.language].add(guess);
       const points = this.calculatePoints({ word: guess });
       if (this.isPangram({ word: guess })) {
         this.showMessage({
@@ -151,56 +211,64 @@ export const useMainStore = defineStore({
         });
       }
     },
-    startGame({ allAnswers }: { allAnswers: Array<Answer> }) {
+    startGame(answerObj: LocaleAnswerData) {
       const now = new Date();
-      // if it's the same day, don't restart the game
       if (isSameDay(this.getGameDate, now)) return false;
 
-      // set gameDate to clear guesses tomorrow
       this.gameDate = now;
-      // new game so reset guesses
-      this.correctGuesses = new Set([]);
 
-      const { todaysAnswerObj, yesterdaysAnswerObj } = generateAnswerObjs({
-        allAnswers,
-        gameDate: this.gameDate,
-      });
-      this.setYesterdaysAnswersAndLastGameDate({ yesterdaysAnswerObj });
+      const yesterdaysAnswerObjs: LocaleYesterdayAnswerObj = {};
 
-      // set yesterday and todays answers and letters
-      const { answers, availableLetters, middleLetter } = todaysAnswerObj;
+      for (const [locale, localeAnswers] of Object.entries(answerObj)) {
+        this.correctGuesses[locale] = new Set([]);
 
-      this.answers = answers;
-      this.availableLetters = availableLetters;
-      this.middleLetter = middleLetter;
+        const { todaysAnswerObj, yesterdaysAnswerObj } = generateAnswerObjs({
+          allAnswers: localeAnswers,
+          gameDate: this.gameDate,
+        });
+
+        yesterdaysAnswerObjs[locale] = yesterdaysAnswerObj;
+
+        const { answers, availableLetters, middleLetter } = todaysAnswerObj;
+
+        this.answers[locale] = answers;
+        this.availableLetters[locale] = availableLetters;
+        this.middleLetter[locale] = middleLetter;
+      }
+      this.setYesterdaysAnswersAndLastGameDate({ yesterdaysAnswerObjs });
     },
     setYesterdaysAnswersAndLastGameDate({
-      yesterdaysAnswerObj,
+      yesterdaysAnswerObjs,
     }: {
-      yesterdaysAnswerObj: Answer;
+      yesterdaysAnswerObjs: LocaleYesterdayAnswerObj;
     }): string {
       // note: must be run after gameDate is set and before answers, availableLetters, and middleLetter are set!
-      // the algorithm used to pick todays and yesterdays answers may change.
+      // the algorithm used to pick todays and yesterday's answers may change.
       // e.g. https://github.com/ConorSheehan1/spelling-bee/issues/3
-      // bug where yesterdays answers were always incorrect at the first of the month.
-      // to avoid this, use todays answers from local storage as yesterdays answers if gamedate was yesterday
-      if (differenceInDays(this.gameDate, this.lastGameDate) === 1) {
-        this.yesterdaysAnswers = this.answers;
-        this.yesterdaysAvailableLetters = this.availableLetters;
-        this.yesterdaysMiddleLetter = this.middleLetter;
-        return "local-storage-cache";
-      } else {
-        const {
-          answers: yesterdaysAnswers,
-          availableLetters: yesterdaysAvailableLetters,
-          middleLetter: yesterdaysMiddleLetter,
-        } = yesterdaysAnswerObj;
-        this.yesterdaysAnswers = yesterdaysAnswers;
-        this.yesterdaysAvailableLetters = yesterdaysAvailableLetters;
-        this.yesterdaysMiddleLetter = yesterdaysMiddleLetter;
-        this.lastGameDate = this.gameDate;
-        return "cache-bust";
+      // bug where yesterday's answers were always incorrect at the first of the month.
+      // to avoid this, use today's answers from local storage as yesterday's answers if gamedate was yesterday
+      for (const [locale, yesterdaysAnswerObj] of Object.entries(
+        yesterdaysAnswerObjs
+      )) {
+        if (differenceInDays(this.gameDate, this.lastGameDate) === 1) {
+          this.yesterdaysAnswers[locale] = this.answers[locale];
+          this.yesterdaysAvailableLetters[locale] =
+            this.availableLetters[locale];
+          this.yesterdaysMiddleLetter[locale] = this.middleLetter[locale];
+          return "local-storage-cache";
+        } else {
+          const {
+            answers: yesterdaysAnswers,
+            availableLetters: yesterdaysAvailableLetters,
+            middleLetter: yesterdaysMiddleLetter,
+          } = yesterdaysAnswerObj;
+          this.yesterdaysAnswers[locale] = yesterdaysAnswers;
+          this.yesterdaysAvailableLetters[locale] = yesterdaysAvailableLetters;
+          this.yesterdaysMiddleLetter[locale] = yesterdaysMiddleLetter;
+          this.lastGameDate = this.gameDate;
+        }
       }
+      return "cache-bust";
     },
     calculatePoints({ word }: { word: string }): number {
       if (word.length === 4) return 1;
@@ -219,7 +287,7 @@ export const useMainStore = defineStore({
       $t: Function;
       points: number;
     }): string {
-      const message = this.pointsMessages[points] || "awesome";
+      const message = this.pointsMessages[points] || "amazing";
       return `${$t(`points.${message}`)}! +${points}`;
     },
     cellClassName({ row, columnIndex }: { row: any; columnIndex: number }) {

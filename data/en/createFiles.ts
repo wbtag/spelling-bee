@@ -7,7 +7,7 @@
 import { readFileSync, writeFileSync }  from "fs";
 import cliProgress from "cli-progress";
 import readlineSync from "readline-sync";
-import { generateAnswerObjs, shuffle } from "../src/utils";
+import { generateAnswerObjs, shuffle } from "../../src/utils";
 // script will fail if allAnswers.json does not already exist. can just create empty file if running for first time.
 import currentAnswers from "./allAnswers.json";
 

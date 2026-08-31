@@ -3,15 +3,16 @@
   "private": true,
   "version": "2.4.0",
   "scripts": {
-    "dev": "vite",
+    "dev": "vite --host",
     "build": "vite build",
     "preview": "vite preview",
     "lint": "yarn lint:prettier",
     "lint:prettier": "prettier --check .",
     "lintfix": "prettier --write --list-different .",
     "test": "vitest --run",
-    "createAllWords": "ts-node data/AllWords/createAllWords.ts",
-    "createFiles": "ts-node data/createFiles.ts"
+    "words:create:en": "ts-node data/en/AllWords/createAllWords.ts",
+    "files:create:en": "ts-node data/en/createFiles.ts",
+    "files:create:cs": "ts-node data/cs/createFiles.ts"
   },
   "prettier": {
     "bracketSameLine": true

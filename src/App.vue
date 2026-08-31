@@ -1,15 +1,21 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from "vue";
+import { useI18n } from "vue-i18n";
 import Hive from "./components/Hive.vue";
 import CorrectGuesses from "./components/CorrectGuesses.vue";
 import Progress from "./components/Progress.vue";
 import YesterdaysAnswers from "./components/YesterdaysAnswers.vue";
 import Info from "./components/Info.vue";
-import GameWon from "./components/GameWon.vue";
-import MigrationModal from "./components/MigrationModal.vue";
-import allAnswers from "../data/allAnswers.json";
+import Genius from "./components/Genius.vue";
+import allAnswersEn from "../data/en/allAnswers.json";
+import allAnswersCs from "../data/cs/allAnswers.json";
 import { useMainStore } from "./store";
 import { InfoFilled, Calendar, Sunny, Moon } from "@element-plus/icons-vue";
+
+const answers: Record<string, any> = {
+  'en': allAnswersEn,
+  'cs': allAnswersCs,
+}
 
 const store = useMainStore();
 const showYesterdaysAnswers = ref(false);
@@ -19,6 +25,11 @@ const gameWonModalShown = ref(false); // only show gameWon modal once
 let timer: any;
 
 const darkmode = ref(store.theme === "dark");
+const { locale } = useI18n();
+const languages = [
+  { code: "en", label: "English", flag: "🇬🇧" },
+  { code: "cs", label: "Česky", flag: "🇨🇿" },
+];
 
 const onToggleDarkMode = () => {
   if (darkmode.value === true) {
@@ -30,16 +41,14 @@ const onToggleDarkMode = () => {
   }
 };
 
+const onChangeLanguage = (code: string) => {
+  store.language = code;
+  locale.value = code;
+};
+
 const showGameWonModal = computed(
   () => store.getProgressPercentage === 100 && gameWonModalShown.value === false
 );
-
-let showMigrationModal = ref(false);
-const checkUrl = () => {
-  showMigrationModal.value = window.location.href.includes(
-    "spelling-b.netlify.app"
-  );
-};
 
 const onOpenCorrectGuesses = () => {
   // without clearing timer, if user toggles correct guesses quickly, it will fade to background after timeout
@@ -55,11 +64,10 @@ const onCloseCorrectGuesses = () => {
 
 onMounted(() => {
   onToggleDarkMode();
-  checkUrl();
+  locale.value = store.language;
 });
 
-store.startGame({ allAnswers });
-// TODO: remove i18n
+store.startGame( answers );
 // TODO: extra not in spellingbee: track scores across days
 // TODO: add shake animation on incorrect submission?
 // https://www.reddit.com/r/webdev/comments/su6y4r/what_animations_are_used_in_wordle/
@@ -67,14 +75,10 @@ store.startGame({ allAnswers });
 </script>
 
 <template>
-  <el-dialog v-model="showMigrationModal" title="URL Migration">
-    <MigrationModal />
-  </el-dialog>
   <el-dialog
     v-model="showGameWonModal"
-    @closed="gameWonModalShown = true"
-    title="Congratulations!">
-    <GameWon />
+    @closed="gameWonModalShown = true">
+    <Genius />
   </el-dialog>
   <el-dialog v-model="showYesterdaysAnswers" :title="$t('Yesterdays Answers')">
     <YesterdaysAnswers />
@@ -85,13 +89,31 @@ store.startGame({ allAnswers });
   <div class="common-layout fireworks">
     <div class="beforeFireworks" v-if="showGameWonModal" />
     <div class="afterFireworks" v-if="showGameWonModal" />
-    <el-header height="2em" id="title-header">
-      <h2>
-        <strong> Spelling Bee </strong>
+    <el-header height="3em" id="title-header">
+      <h2 class="title-flex">
+        <strong> {{$t('title')}} </strong>
         <span> {{ store.getGameDateString }} </span>
       </h2>
     </el-header>
     <el-menu mode="horizontal" :ellipsis="false">
+      <el-menu-item index="0">
+        <el-dropdown trigger="click" @command="onChangeLanguage">
+          <span class="language-switcher">
+            {{ languages.find((lang) => lang.code === store.language)?.label }}
+          </span>
+          <template #dropdown>
+            <el-dropdown-menu>
+              <el-dropdown-item
+                v-for="lang in languages"
+                :key="lang.code"
+                :command="lang.code"
+                :disabled="lang.code === store.language">
+                {{ lang.flag }} {{ lang.label }}
+              </el-dropdown-item>
+            </el-dropdown-menu>
+          </template>
+        </el-dropdown>
+      </el-menu-item>
       <el-menu-item index="1" @click="showInfo = true">
         <el-tooltip :content="$t('Info')" placement="top">
           <el-icon class="menu-icon">
@@ -146,6 +168,12 @@ store.startGame({ allAnswers });
 :root {
   --el-color-success: variables.$bl-yellow;
   --el-primary-color: variables.$bl-yellow;
+  --el-font-size-base: 16px;
+}
+
+@font-face {
+  font-family: "Garamond";
+  src: url("/garamond.ttf") format("truetype");
 }
 
 html {
@@ -163,9 +191,21 @@ div {
   word-break: break-word;
 }
 
+.title-flex {
+  display: flex;
+  flex-direction: row;
+  column-gap: 5px;
+  justify-content: center;
+}
+
 .darkmode-switch {
   --el-switch-on-color: variables.$bl-yellow;
   margin-top: 5px;
+}
+
+.language-switcher {
+  cursor: pointer;
+  font-weight: bold;
 }
 
 h2 span {
@@ -192,11 +232,12 @@ h2 span {
   .el-menu-item {
     padding: 0;
   }
-  // yellow is too bright on light theme, use default blue
-  // .el-menu-item.is-active {
-  //   color: $bl-yellow !important;
-  //   border-bottom-color: currentcolor;
-  // }
+  // these menu items are one-off actions (open dialog, toggle, pick language),
+  // not persistent tabs, so never show them as "selected" after a click
+  .el-menu-item.is-active {
+    color: var(--el-menu-text-color) !important;
+    border-bottom-color: transparent !important;
+  }
 }
 .is-focused {
   border-color: variables.$bl-yellow !important;
@@ -222,12 +263,13 @@ h2 span {
 }
 
 #app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
+  font-family: "Garamond", Avenir, Helvetica, Arial, sans-serif;
+  font-size: 1.15em;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: #2c3e50;
-  margin-top: 40px;
+  margin: 40px auto 0;
   padding: 0 10px;
 
   // account for 10px padding on either side of #app
