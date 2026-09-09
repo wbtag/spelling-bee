@@ -1,0 +1,14 @@
+[
+  {
+    "letters": ["e", "r"],
+    "sampling": 0
+  },
+  {
+    "letters": ["s"],
+    "sampling": 10
+  },
+  {
+    "letters": ["i", "n", "g"],
+    "sampling": 10
+  }
+]

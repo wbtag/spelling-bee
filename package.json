@@ -1,18 +1,17 @@
 {
   "name": "spelling-bee",
   "private": true,
-  "version": "2.4.0",
+  "version": "3.0.0",
   "scripts": {
     "dev": "vite --host",
     "build": "vite build",
     "preview": "vite preview",
-    "lint": "yarn lint:prettier",
+    "lint": "pnpm lint:prettier",
     "lint:prettier": "prettier --check .",
     "lintfix": "prettier --write --list-different .",
     "test": "vitest --run",
-    "words:create:en": "ts-node data/en/AllWords/createAllWords.ts",
-    "files:create:en": "ts-node data/en/createFiles.ts",
-    "files:create:cs": "ts-node data/cs/createFiles.ts"
+    "files:create:en": "cd data && ts-node createFiles.ts --locale 'en'",
+    "files:create:cs": "cd data && ts-node createFiles.ts --locale 'cs'"
   },
   "prettier": {
     "bracketSameLine": true
@@ -33,6 +32,7 @@
   "devDependencies": {
     "@intlify/unplugin-vue-i18n": "^11.2.4",
     "@types/cli-progress": "^3.11.0",
+    "@types/node": "^26.4.1",
     "@types/readline-sync": "^1.4.4",
     "@vitejs/plugin-vue": "^6.0.8",
     "@vue/test-utils": "^2.0.2",
