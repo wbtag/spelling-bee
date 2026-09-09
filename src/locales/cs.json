@@ -12,7 +12,7 @@
   "AcknowledgementsTitle": "Na ramenou obrů",
   "AcknowledgementsText": "Původní aplikaci vytvořil Conor Sheehan:",
   "Bugs": "Chyby",
-  "BugText": "Chyby je možné nahlásit přes",
+  "BugText": "Pokud naleznete v aplikaci chybu, neváhejte ji nahlásit přes",
   "foundWords": "Našli jste 0 slov | Našli jste 1 slovo | Našli jste {n} slov",
   "GeniusTitle": "Hurá! Jste geniální!",
   "Your words": "Slova",
@@ -30,6 +30,9 @@
   "Enter": "Zkusit",
   "Ranking": "Hodnosti",
   "RankMSG": "Hodnosti vychází z celkového počtu za všechna slova. Minimální počty bodů pro každou hodnost jsou dnes",
+  "WordListSource": "\nSeznam slov sestavil Vojtěch Greger na základě morfologického slovníku MorfFlex 2.1 vytvořeného ÚFAL MFF UK: ",
+  "WordListLink": "https://github.com/wbtag/cs-wordlist",
+  "WordListLinkText": "Github repo",
   "rank": {
     "0": "Začátečník",
     "1": "Dobrý začátek",

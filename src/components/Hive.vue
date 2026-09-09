@@ -217,6 +217,8 @@ polygon.cell-fill {
   padding: 15px;
   flex: 1;
   background-color: #fff;
+  font-family: inherit;
+  font-weight: 500;
   font-size: 18px;
   margin: 0 12px;
   color: #333;

@@ -168,7 +168,7 @@ store.startGame( answers );
 :root {
   --el-color-success: variables.$bl-yellow;
   --el-primary-color: variables.$bl-yellow;
-  --el-font-size-base: 16px;
+  --el-font-size-base: 1em;
 }
 
 @font-face {

@@ -42,4 +42,7 @@ import Acknowledgments from "./Acknowledgments.vue";
 .info-dialog {
   text-align: left;
 }
+.el-link {
+  vertical-align: top;
+}
 </style>
