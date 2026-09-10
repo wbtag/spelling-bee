@@ -11,6 +11,7 @@ import allAnswersEn from "../data/en/allAnswers.json";
 import allAnswersCs from "../data/cs/allAnswers.json";
 import { useMainStore } from "./store";
 import { InfoFilled, Calendar, Sunny, Moon } from "@element-plus/icons-vue";
+import { locales } from "./utils";
 
 const answers: Record<string, any> = {
   'en': allAnswersEn,
@@ -26,10 +27,12 @@ let timer: any;
 
 const darkmode = ref(store.theme === "dark");
 const { locale } = useI18n();
-const languages = [
-  { code: "en", label: "English", flag: "🇬🇧" },
-  { code: "cs", label: "Česky", flag: "🇨🇿" },
-];
+
+const languages = Object.entries(locales).map(([k,v]) => ({
+  code: k,
+  label: v.label,
+  flag: v.flag,
+}));
 
 const onToggleDarkMode = () => {
   if (darkmode.value === true) {

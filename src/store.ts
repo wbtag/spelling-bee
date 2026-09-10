@@ -3,7 +3,7 @@ import { defineStore } from "pinia";
 import { useStorage } from "@vueuse/core";
 import { ElMessage } from "element-plus";
 import { differenceInDays, isSameDay } from "date-fns";
-import { epoch, generateAnswerObjs, incrementDups } from "./utils";
+import { epoch, locales, generateAnswerObjs, incrementDups } from "./utils";
 import { Answer } from "./models/answer";
 
 interface LocaleAnswerData {
@@ -30,7 +30,7 @@ interface LocaleYesterdayAnswerObj {
   [locale: string]: Answer;
 }
 
-const correctGuesses = ['en', 'cs'].reduce((acc, curr) => {
+const correctGuesses = Object.keys(locales).reduce((acc, curr) => {
   acc[curr] = new Set([]);
   return acc;
 }, {} as LocaleCorrectGuesses);
@@ -156,11 +156,7 @@ export const useMainStore = defineStore("main", {
       return this.gameDate;
     },
     getGameDateString(): string {
-      const locales: Record<string, string> = {
-        en: "en-gb",
-        cs: "cs-cz",
-      };
-      return this.getGameDate.toLocaleDateString(locales[this.language]);
+      return this.getGameDate.toLocaleDateString(locales[this.language]?.fullCode);
     },
   },
   actions: {

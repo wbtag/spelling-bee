@@ -53,9 +53,15 @@ while a value of 0 will exclude such puzzles altogether.
 
 ## Adding new locales
 
-Each new locale needs a separate folder whose name matches the code of the locale. The folder must contain `words.txt`,
-same format as described above. The locale must also be specified in the App.vue file, i18n.ts, and should also have
-its own translations in `src/locales`. Additionally, the locale must be declared in store.ts (lines 33 and 159-162).
+Each new locale needs a separate folder whose name matches its code. The folder must contain `words.txt`,
+same format as described above. `data/createFiles.ts` then needs to be run over the folder to generate answer files. 
+
+A new locale needs to be declared in the following places:
+* `src/App.vue` - import answer file
+* `src/locales/` - add JSON file with translations
+* `src/i18n.ts` - import JSON translation
+* `src/utils.ts` - add to locales object
+
 Currently, locale selection governs both the language of the game and the UI, but a separation of the two is planned.
 
 ## Favicon
