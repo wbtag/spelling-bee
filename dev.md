@@ -2,7 +2,7 @@
 
 ```shell
 # current versions are:
-# node 24.13.0
+# node 24.14.0
 # npm  11.7.0
 # pnpm 11.1.1
 

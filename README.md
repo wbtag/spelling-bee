@@ -2,6 +2,8 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
+Forked from [Spelling Bee](https://github.com/ConorSheehan1/spelling-bee).
+
 An open-source game inspired by the New York Times Spelling Bee Puzzle.
 New challenge every day. Create words using letters from the hive.
 Now with a separate Czech version.
