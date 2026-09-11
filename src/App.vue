@@ -50,8 +50,7 @@ const onChangeLanguage = (code: string) => {
 };
 
 const showGameWonModal = computed(
-  // () => store.getProgressPercentage === 100 && gameWonModalShown.value === false
-  () => true
+  () => store.getProgressPercentage === 100 && gameWonModalShown.value === false
 );
 
 const onOpenCorrectGuesses = () => {
