@@ -95,6 +95,11 @@ const generateAnswerObjs = ({
   return { todaysAnswerObj, yesterdaysAnswerObj };
 };
 
+const locales: Record<string, Record<string, string>> = {
+  en: { fullCode: "en-GB", label: "English", flag: "🇬🇧" },
+  cs: { fullCode: "cs-CZ", label: "Česky", flag: "🇨🇿" },
+};
+
 export {
   chunk,
   epoch,
@@ -103,4 +108,5 @@ export {
   incrementDups,
   shuffle,
   zip,
+  locales
 };

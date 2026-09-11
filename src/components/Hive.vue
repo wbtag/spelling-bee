@@ -1,16 +1,10 @@
 <script setup lang="ts">
-import { onMounted, onUnmounted, ref } from "vue";
+import { onMounted, onUnmounted, ref, watch } from "vue";
 import { useMainStore } from "../store";
 import { shuffle } from "../utils";
 import { useI18n } from "vue-i18n";
-import en from "../locales/en.json";
 
-const { t } = useI18n({
-  inheritLocale: true,
-  messages: {
-    en,
-  },
-});
+const { t } = useI18n();
 
 // `defineProps` is a compiler macro and no longer needs to be imported.
 defineProps({
@@ -19,9 +13,18 @@ defineProps({
 const store = useMainStore();
 
 const otherLetters = ref(
-  store.availableLetters
+  store.availableLetters[store.language]
     .split("")
-    .filter((l: string) => l !== store.middleLetter)
+    .filter((l: string) => l !== store.middleLetter[store.language])
+);
+
+watch(
+  () => store.language,
+  (language) => {
+    otherLetters.value = store.availableLetters[language]
+      .split("")
+      .filter((l: string) => l !== store.middleLetter[language]);
+  }
 );
 let userGuess = ref("");
 
@@ -33,7 +36,7 @@ const onKeyPress = (e: KeyboardEvent) => {
     userGuess.value = userGuess.value.slice(0, -1);
     return false;
   }
-  if (pressedKey.length === 1 && store.availableLetters.includes(pressedKey)) {
+  if (pressedKey.length === 1 && store.availableLetters[store.language].includes(pressedKey)) {
     userGuess.value += pressedKey;
     return true;
   }
@@ -57,7 +60,7 @@ onUnmounted(() => {
     <div class="user-guess">
       <strong
         v-for="(letter, index) in userGuess"
-        :class="{ 'middle-letter': letter === store.middleLetter }"
+        :class="{ 'middle-letter': letter === store.middleLetter[store.language] }"
         :key="`user-guess-${index}`">
         {{ letter }}
       </strong>
@@ -66,7 +69,7 @@ onUnmounted(() => {
     <div class="hive">
       <svg
         class="hive-cell center"
-        @click="userGuess += store.middleLetter"
+        @click="userGuess += store.middleLetter[store.language]"
         viewBox="0 0 120 104">
         <polygon
           class="cell-fill"
@@ -74,7 +77,7 @@ onUnmounted(() => {
           :stroke="store.getColor"
           stroke-width="7.5" />
         <text class="cell-letter" x="50%" y="50%" dy="10.75%">
-          {{ store.middleLetter }}
+          {{ store.middleLetter[store.language] }}
         </text>
       </svg>
       <svg
@@ -214,6 +217,8 @@ polygon.cell-fill {
   padding: 15px;
   flex: 1;
   background-color: #fff;
+  font-family: inherit;
+  font-weight: 500;
   font-size: 18px;
   margin: 0 12px;
   color: #333;

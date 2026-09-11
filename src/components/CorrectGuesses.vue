@@ -4,14 +4,8 @@ import { useMainStore } from "../store";
 import { gridify } from "../utils";
 
 import { useI18n } from "vue-i18n";
-import en from "../locales/en.json";
 
-const { t } = useI18n({
-  inheritLocale: true,
-  messages: {
-    en,
-  },
-});
+const { t } = useI18n();
 
 const store = useMainStore();
 // showWords el-collapse has 2 elems when expanded, 1 when collapsed.
@@ -70,7 +64,12 @@ const gridData = computed(
 @use "../assets/styles/_variables";
 
 .correct-guesses-table {
-  min-height: 50vh;
+  min-height: 5p0vh;
+}
+
+.el-collapse {
+  --el-collapse-header-font-size: 16px;
+  --el-collapse-content-font-size: 16px;
 }
 
 html.dark .el-collapse {

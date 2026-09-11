@@ -7,29 +7,30 @@ const showRanking = ref(false);
 </script>
 
 <template>
-  <el-dialog v-model="showRanking" :title="$t('Ranking')">
-    <div class="ranking-dialog">
-      <p>{{ $t("RankMSG") }}:</p>
-      <ul>
-        <li
-          v-for="(scoreLevel, index) in store.getScoreLevels"
-          :key="`ranking${index}`">
-          {{ $t(`rank.${index}`) }} ({{ scoreLevel }})
-        </li>
-      </ul>
+    <el-dialog v-model="showRanking" :title="$t('Ranking')">
+      <div class="ranking-dialog">
+        <p>{{ $t("RankMSG") }}:</p>
+        <ul>
+          <li
+            v-for="(scoreLevel, index) in store.getScoreLevels"
+            :key="`ranking${index}`">
+            {{ $t(`rank.${index}`) }} ({{ scoreLevel }})
+          </li>
+        </ul>
+      </div>
+    </el-dialog>
+    <div class="row" @click="showRanking = true">
+      <strong class="rank-level">
+        {{ $t(`rank.${store.getProgressIndex}`) }}
+      </strong>
+      <!-- can't use bl-yellow directly, need to pass hex in here -->
+      <el-progress
+        :percentage="store.getProgressPercentage"
+        :stroke-width="20"
+        class="progress-width"
+        color="#fce303"
+        :format="() => store.getUserScore" />
     </div>
-  </el-dialog>
-  <div class="row" @click="showRanking = true">
-    <strong class="rank-level">
-      {{ $t(`rank.${store.getProgressIndex}`) }}
-    </strong>
-    <!-- can't use bl-yellow directly, need to pass hex in here -->
-    <el-progress
-      :percentage="store.getProgressPercentage"
-      :stroke-width="20"
-      color="#fce303"
-      :format="() => store.getUserScore" />
-  </div>
 </template>
 
 <style scoped lang="scss">
@@ -41,6 +42,11 @@ const showRanking = ref(false);
 
 .ranking-dialog {
   text-align: left;
+}
+
+.progress-width {
+  max-width: 600px;
+  margin: 0 auto;
 }
 
 html.dark .row strong {
