@@ -50,7 +50,8 @@ const onChangeLanguage = (code: string) => {
 };
 
 const showGameWonModal = computed(
-  () => store.getProgressPercentage === 100 && gameWonModalShown.value === false
+  // () => store.getProgressPercentage === 100 && gameWonModalShown.value === false
+  () => true
 );
 
 const onOpenCorrectGuesses = () => {
@@ -80,6 +81,8 @@ store.startGame( answers );
 <template>
   <el-dialog
     v-model="showGameWonModal"
+    style="max-width: 500px"
+    align-center
     @closed="gameWonModalShown = true">
     <Genius />
   </el-dialog>

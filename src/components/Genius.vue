@@ -4,9 +4,11 @@ const { t } = useI18n();
 </script>
 
 <template>
+  <div class="max-w-xl mx-auto">
   <img
     src="../assets/bee.png"
-    height="250"
+    height="150"
   />
   <h2>{{$t("GeniusTitle")}}</h2>
+  </div>
 </template>
