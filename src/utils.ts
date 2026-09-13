@@ -76,8 +76,8 @@ const incrementDups = (arr: Array<number>): Array<number> => {
   });
 };
 
-// year game started, not released until mid-year so no issue using as epoch
-const epoch = new Date('2026-06-01');
+// local midnight, so differenceInDays counts local calendar days in every timezone
+const epoch = new Date(2026, 5, 1);
 
 const generateAnswerObjs = ({
   allAnswers,
@@ -86,7 +86,7 @@ const generateAnswerObjs = ({
   allAnswers: Array<Answer>;
   gameDate: Date;
 }): { todaysAnswerObj: Answer; yesterdaysAnswerObj: Answer } => {
-  // use days since arbitrary epoch to ensure yesterdays answers is always 1 behind todays.
+  // use days since arbitrary epoch to ensure yesterday's answers is always 1 behind today's.
   const daysSinceEpoch = differenceInDays(gameDate, epoch);
   // pick next puzzle input, % len puzzles to restart if out of index (circular)
   const todaysAnswerObj = allAnswers[daysSinceEpoch % allAnswers.length];
