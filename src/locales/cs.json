@@ -30,9 +30,12 @@
   "Enter": "Zkusit",
   "Ranking": "Hodnosti",
   "RankMSG": "Hodnosti vychází z celkového počtu za všechna slova. Minimální počty bodů pro každou hodnost jsou dnes",
-  "WordListSource": "\nSeznam slov sestavil Vojtěch Greger na základě morfologického slovníku MorfFlex 2.1 vytvořeného ÚFAL MFF UK: ",
+  "WordListSource": "Seznam slov sestavil Vojtěch Greger na základě slovníku MorfFlex 2.1 (ÚFAL MFF UK):",
   "WordListLink": "https://github.com/wbtag/cs-wordlist",
   "WordListLinkText": "Github repo",
+  "CzechRulesTitle": "Pravidla pro českou verzi",
+  "CzechVerbsRule": "Slovesa jsou povolena pouze v infinitivu.",
+  "CzechNounsAdjectivesRule": "Podstatná a přídavná jména jsou povolena pouze v mužském rodě.",
   "rank": {
     "0": "Začátečník",
     "1": "Dobrý začátek",
