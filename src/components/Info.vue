@@ -1,5 +1,8 @@
 <script setup lang="ts">
 import Acknowledgments from "./Acknowledgments.vue";
+import { useI18n } from "vue-i18n";
+const { t } = useI18n();
+const props = defineProps(["language"]);
 </script>
 
 <template>
@@ -19,6 +22,14 @@ import Acknowledgments from "./Acknowledgments.vue";
       <li>{{ $t("helpPointsRule2") }}.</li>
       <li>{{ $t("helpPointsRule3A") }}. {{ $t("helpPointsRule3B") }}!</li>
     </ul>
+
+    <div v-if="language === 'cs'">
+      <h3>{{ $t("CzechRulesTitle") }}</h3>
+      <ul>
+        <li>{{ $t("CzechNounsAdjectivesRule") }}</li>
+        <li>{{ $t("CzechVerbsRule") }}</li>
+      </ul>
+    </div>
 
     <h3>{{ $t("AcknowledgementsTitle") }}</h3>
     <Acknowledgments />

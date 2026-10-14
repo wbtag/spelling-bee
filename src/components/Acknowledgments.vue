@@ -16,7 +16,7 @@ const { t } = useI18n();
     <li>
       <span>{{ $t("WordListSource") }}</span>
       <el-link type="primary" href="$t('WordListLink')" target="_blank">
-        Github repo
+        GitHub repo
       </el-link>
     </li>
   </ul>

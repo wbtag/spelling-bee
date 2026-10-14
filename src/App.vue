@@ -89,12 +89,12 @@ store.startGame( answers );
     <YesterdaysAnswers />
   </el-dialog>
   <el-dialog v-model="showInfo" :title="$t('How to play')">
-    <Info />
+    <Info :language="store.language" />
   </el-dialog>
   <div class="common-layout fireworks">
     <div class="beforeFireworks" v-if="showGameWonModal" />
     <div class="afterFireworks" v-if="showGameWonModal" />
-    <el-header height="3em" id="title-header">
+    <el-header height="auto" id="title-header">
       <h2 class="title-flex">
         <strong> {{$t('title')}} </strong>
         <span> {{ store.getGameDateString }} </span>
@@ -199,6 +199,8 @@ div {
 .title-flex {
   display: flex;
   flex-direction: row;
+  flex-wrap: wrap;
+  align-items: baseline;
   column-gap: 5px;
   justify-content: center;
 }
@@ -283,6 +285,7 @@ h2 span {
   #title-header {
     margin: 0;
     padding: 0;
+    min-height: 3em;
     overflow: hidden;
   }
 }
